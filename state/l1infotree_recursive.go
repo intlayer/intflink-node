@@ -54,14 +54,14 @@ func (s *State) AddLeafToL1InfoTreeRecursive(ctx context.Context, l1InfoTreeLeaf
 		return nil, err
 	}
 	log.Debug("latestIndex: ", gerIndex)
-	root, err := s.l1InfoTreeRecursive.AddLeaf(newIndex, l1InfoTreeLeaf.Hash())
+	snapShot, err := s.l1InfoTreeRecursive.AddLeaf(newIndex, l1InfoTreeLeaf.Hash())
 	if err != nil {
 		log.Error("error add new leaf to the L1InfoTreeRecursive. Error: ", err)
 		return nil, err
 	}
 	entry := L1InfoTreeExitRootStorageEntry{
 		L1InfoTreeLeaf:  *l1InfoTreeLeaf,
-		L1InfoTreeRoot:  root,
+		L1InfoTreeRoot:  snapShot.L1InfoTreeRoot,
 		L1InfoTreeIndex: newIndex,
 	}
 	err = s.AddL1InfoRootToExitRoot(ctx, &entry, dbTx)
