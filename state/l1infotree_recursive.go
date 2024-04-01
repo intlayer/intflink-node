@@ -38,8 +38,8 @@ func (s *State) buildL1InfoTreeRecursiveCacheIfNeed(ctx context.Context, dbTx pg
 	return nil
 }
 
-// AddLeafToL1InfoTreeRecursive adds a new leaf to the L1InfoTree and returns the entry and error
-func (s *State) AddLeafToL1InfoTreeRecursive(ctx context.Context, l1InfoTreeLeaf *L1InfoTreeLeaf, dbTx pgx.Tx) (*L1InfoTreeExitRootStorageEntry, error) {
+// AddL1InfoTreeRecursiveLeaf adds a new leaf to the L1InfoTree and returns the entry and error
+func (s *State) AddL1InfoTreeRecursiveLeaf(ctx context.Context, l1InfoTreeLeaf *L1InfoTreeLeaf, dbTx pgx.Tx) (*L1InfoTreeExitRootStorageEntry, error) {
 	var newIndex uint32
 	gerIndex, err := s.GetLatestIndex(ctx, dbTx)
 	if err != nil && !errors.Is(err, ErrNotFound) {

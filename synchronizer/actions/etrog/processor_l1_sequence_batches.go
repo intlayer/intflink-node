@@ -55,9 +55,9 @@ func NewProcessorL1SequenceBatches(state stateProcessSequenceBatches,
 	timeProvider syncCommon.TimeProvider,
 	halter syncinterfaces.CriticalErrorHandler) *ProcessorL1SequenceBatchesEtrog {
 	return &ProcessorL1SequenceBatchesEtrog{
-		ProcessorBase: actions.ProcessorBase[ProcessorL1SequenceBatchesEtrog]{
-			SupportedEvent:    []etherman.EventOrder{etherman.SequenceBatchesOrder, etherman.InitialSequenceBatchesOrder},
-			SupportedForkdIds: &actions.ForksIdOnlyEtrog},
+		ProcessorBase: *actions.NewProcessorBase[ProcessorL1SequenceBatchesEtrog](
+			[]etherman.EventOrder{etherman.SequenceBatchesOrder, etherman.InitialSequenceBatchesOrder},
+			actions.ForksIdOnlyEtrog),
 		state:        state,
 		sync:         sync,
 		timeProvider: timeProvider,
