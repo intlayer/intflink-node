@@ -87,6 +87,24 @@ func (s *State) AddL1InfoTreeLeaf(ctx context.Context, l1InfoTreeLeaf *L1InfoTre
 	return &entry, nil
 }
 
+func (s *State) ResetL1InfoTree(ctx context.Context, dbTx pgx.Tx) error {
+	allLeaves, err := s.GetAllL1InfoRootEntries(ctx, dbTx)
+	if err != nil {
+		log.Error("error getting all leaves to reset l1InfoTree. Error: ", err)
+		return err
+	}
+	var leaves [][32]byte
+	for _, leaf := range allLeaves {
+		leaves = append(leaves, leaf.Hash())
+	}
+	s.l1InfoTree, err = s.l1InfoTree.ResetL1InfoTree(leaves)
+	if err != nil {
+		log.Error("error resetting l1InfoTree. Error: ", err)
+		return err
+	}
+	return nil
+}
+
 // GetCurrentL1InfoRoot Return current L1InfoRoot
 func (s *State) GetCurrentL1InfoRoot(ctx context.Context, dbTx pgx.Tx) (common.Hash, error) {
 	err := s.buildL1InfoTreeCacheIfNeed(ctx, dbTx)
