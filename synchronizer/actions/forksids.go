@@ -21,6 +21,7 @@ const (
 var (
 
 	/// ************** ALL ***************///
+
 	// ForksIdAll support all forkIds
 	ForksIdAll = []ForkIdType{WildcardForkId}
 

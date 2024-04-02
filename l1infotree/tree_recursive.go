@@ -10,6 +10,9 @@ type L1InfoTreeRecursive struct {
 	historicL1InfoTree *L1InfoTree
 	snapShot           L1InfoTreeRecursiveSnapshot
 }
+
+// L1InfoTreeRecursiveSnapshot provides the information generated when a new
+// leaf is added to the tree
 type L1InfoTreeRecursiveSnapshot struct {
 	HistoricL1InfoTreeRoot common.Hash
 	L1Data                 common.Hash

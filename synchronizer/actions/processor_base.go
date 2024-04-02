@@ -13,6 +13,7 @@ type ProcessorBase[T any] struct {
 	supportedForkIds []ForkIdType
 }
 
+// NewProcessorBase creates and initializes internal fields of an new instance of ProcessorBase
 func NewProcessorBase[T any](supportedEvent []etherman.EventOrder, supportedForkIds []ForkIdType) *ProcessorBase[T] {
 	p := &ProcessorBase[T]{
 		supportedEvent:   supportedEvent,
