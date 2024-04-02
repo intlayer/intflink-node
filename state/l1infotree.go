@@ -87,6 +87,7 @@ func (s *State) AddL1InfoTreeLeaf(ctx context.Context, l1InfoTreeLeaf *L1InfoTre
 	return &entry, nil
 }
 
+// ResetL1InfoTree resets the L1InfoTree
 func (s *State) ResetL1InfoTree(ctx context.Context, dbTx pgx.Tx) error {
 	allLeaves, err := s.GetAllL1InfoRootEntries(ctx, dbTx)
 	if err != nil {

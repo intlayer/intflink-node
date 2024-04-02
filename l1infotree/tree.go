@@ -34,7 +34,9 @@ func NewL1InfoTree(height uint8, initialLeaves [][32]byte) (*L1InfoTree, error) 
 	return mt, nil
 }
 
+// ResetL1InfoTree resets the L1InfoTree.
 func (mt *L1InfoTree) ResetL1InfoTree(initialLeaves [][32]byte) (*L1InfoTree, error) {
+	log.Info("Resetting L1InfoTree...")
 	newMT := &L1InfoTree{
 		zeroHashes: mt.zeroHashes,
 		height:     mt.height,
