@@ -5,10 +5,14 @@ import (
 	"github.com/ethereum/go-ethereum/crypto"
 )
 
+const (
+	emptyHistoricL1InfoTreeRoot = "0x27ae5ba08d7291c96c8cbddcc148bf48a6d68c7974b94356f53754ef6171d757"
+)
+
 // L1InfoTreeRecursive is a recursive implementation of the L1InfoTree of Feijoa
 type L1InfoTreeRecursive struct {
 	historicL1InfoTree *L1InfoTree
-	snapShot           L1InfoTreeRecursiveSnapshot
+	currentLeaf        common.Hash
 }
 
 // L1InfoTreeRecursiveSnapshot provides the information generated when a new
@@ -28,13 +32,8 @@ func NewL1InfoTreeRecursive(height uint8) (*L1InfoTreeRecursive, error) {
 
 	mtr := &L1InfoTreeRecursive{
 		historicL1InfoTree: historic,
-		snapShot: L1InfoTreeRecursiveSnapshot{
-			HistoricL1InfoTreeRoot: common.Hash{},
-			L1Data:                 common.Hash{},
-			L1InfoTreeRoot:         common.Hash{},
-		},
+		currentLeaf:        common.Hash{},
 	}
-
 	return mtr, nil
 }
 
@@ -46,36 +45,42 @@ func NewL1InfoTreeRecursiveFromLeaves(height uint8, leaves [][32]byte) (*L1InfoT
 	}
 
 	for i, leaf := range leaves {
-		snapShot, err := mtr.AddLeaf(uint32(i), leaf)
+		_, err := mtr.AddLeaf(uint32(i), leaf)
 		if err != nil {
 			return nil, err
 		}
-		mtr.snapShot = snapShot
+		mtr.currentLeaf = leaf
 	}
 	return mtr, nil
 }
 
-// AddLeaf hashes the current historicL1InfoRoot + leaf data into the new leaf value and then adds it to the historicL1InfoTree
-func (mt *L1InfoTreeRecursive) AddLeaf(index uint32, leaf [32]byte) (L1InfoTreeRecursiveSnapshot, error) {
-	//adds the current l1InfoTreeRoot into the tree to generate the next historicL2InfoTree
-	_, err := mt.historicL1InfoTree.AddLeaf(index, mt.snapShot.L1InfoTreeRoot)
+// AddLeaf hashes the current historicL1InfoRoot + currentLeaf data into the new historicLeaf value,
+// then adds it to the historicL1InfoTree and finally stores the new leaf as the currentLeaf
+func (mt *L1InfoTreeRecursive) AddLeaf(index uint32, leaf [32]byte) (common.Hash, error) {
+	// adds the current l1InfoTreeRoot into the historic tree to generate
+	// the next historicL2InfoTreeRoot
+	l1InfoTreeRoot := mt.GetRoot()
+	_, err := mt.historicL1InfoTree.AddLeaf(index, l1InfoTreeRoot)
 	if err != nil {
-		return L1InfoTreeRecursiveSnapshot{}, err
+		return common.Hash{}, err
 	}
 
-	//creates the new snapshot
-	snapShot := L1InfoTreeRecursiveSnapshot{}
-	snapShot.HistoricL1InfoTreeRoot = mt.historicL1InfoTree.GetRoot()
-	snapShot.L1Data = common.BytesToHash(leaf[:])
-	snapShot.L1InfoTreeRoot = crypto.Keccak256Hash(snapShot.HistoricL1InfoTreeRoot.Bytes(), snapShot.L1Data.Bytes())
-	mt.snapShot = snapShot
+	mt.currentLeaf = leaf
 
-	return snapShot, nil
+	return mt.GetRoot(), nil
 }
 
 // GetRoot returns the root of the L1InfoTreeRecursive
 func (mt *L1InfoTreeRecursive) GetRoot() common.Hash {
-	return mt.snapShot.L1InfoTreeRoot
+	// if the historicL1InfoTree is empty and the the current leaf is also empty
+	// returns the root as all zeros 0x0000...0000
+	if mt.historicL1InfoTree.GetRoot().String() == emptyHistoricL1InfoTreeRoot &&
+		mt.currentLeaf.Cmp(common.Hash{}) == 0 {
+		return common.Hash{}
+	}
+
+	l1InfoTreeRoot := crypto.Keccak256Hash(mt.historicL1InfoTree.GetRoot().Bytes(), mt.currentLeaf[:])
+	return l1InfoTreeRoot
 }
 
 // GetHistoricRoot returns the root of the HistoricL1InfoTree

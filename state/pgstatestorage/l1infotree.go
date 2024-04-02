@@ -11,12 +11,12 @@ import (
 )
 
 const (
-	l1InfoTreeIndexFieldNameV1 = "l1_info_tree_index"
+	l1InfoTreeIndexFieldName = "l1_info_tree_index"
 )
 
 // AddL1InfoRootToExitRoot adds a new entry in ExitRoot and returns index of L1InfoTree and error
 func (p *PostgresStorage) AddL1InfoRootToExitRoot(ctx context.Context, exitRoot *state.L1InfoTreeExitRootStorageEntry, dbTx pgx.Tx) error {
-	return p.addL1InfoRootToExitRootVx(ctx, exitRoot, dbTx, l1InfoTreeIndexFieldNameV1)
+	return p.addL1InfoRootToExitRootVx(ctx, exitRoot, dbTx, l1InfoTreeIndexFieldName)
 }
 
 func (p *PostgresStorage) addL1InfoRootToExitRootVx(ctx context.Context, exitRoot *state.L1InfoTreeExitRootStorageEntry, dbTx pgx.Tx, indexFieldName string) error {
@@ -33,7 +33,7 @@ func (p *PostgresStorage) addL1InfoRootToExitRootVx(ctx context.Context, exitRoo
 }
 
 func (p *PostgresStorage) GetAllL1InfoRootEntries(ctx context.Context, dbTx pgx.Tx) ([]state.L1InfoTreeExitRootStorageEntry, error) {
-	return p.GetAllL1InfoRootEntriesVx(ctx, dbTx, l1InfoTreeIndexFieldNameV1)
+	return p.GetAllL1InfoRootEntriesVx(ctx, dbTx, l1InfoTreeIndexFieldName)
 }
 
 func (p *PostgresStorage) GetAllL1InfoRootEntriesVx(ctx context.Context, dbTx pgx.Tx, indexFieldName string) ([]state.L1InfoTreeExitRootStorageEntry, error) {
@@ -65,7 +65,7 @@ func (p *PostgresStorage) GetAllL1InfoRootEntriesVx(ctx context.Context, dbTx pg
 
 // GetLatestL1InfoRoot is used to get the latest L1InfoRoot
 func (p *PostgresStorage) GetLatestL1InfoRoot(ctx context.Context, maxBlockNumber uint64) (state.L1InfoTreeExitRootStorageEntry, error) {
-	return p.GetLatestL1InfoRootVx(ctx, maxBlockNumber, nil, l1InfoTreeIndexFieldNameV1)
+	return p.GetLatestL1InfoRootVx(ctx, maxBlockNumber, nil, l1InfoTreeIndexFieldName)
 }
 
 // GetLatestL1InfoRoot is used to get the latest L1InfoRoot
@@ -90,7 +90,7 @@ func (p *PostgresStorage) GetLatestL1InfoRootVx(ctx context.Context, maxBlockNum
 	return entry, nil
 }
 func (p *PostgresStorage) GetLatestIndex(ctx context.Context, dbTx pgx.Tx) (uint32, error) {
-	return p.GetLatestIndexVx(ctx, dbTx, l1InfoTreeIndexFieldNameV1)
+	return p.GetLatestIndexVx(ctx, dbTx, l1InfoTreeIndexFieldName)
 }
 func (p *PostgresStorage) GetLatestIndexVx(ctx context.Context, dbTx pgx.Tx, indexFieldName string) (uint32, error) {
 	const getLatestIndexSQL = `SELECT max(%s) as %s FROM state.exit_root 
@@ -110,7 +110,7 @@ func (p *PostgresStorage) GetLatestIndexVx(ctx context.Context, dbTx pgx.Tx, ind
 }
 
 func (p *PostgresStorage) GetL1InfoRootLeafByL1InfoRoot(ctx context.Context, l1InfoRoot common.Hash, dbTx pgx.Tx) (state.L1InfoTreeExitRootStorageEntry, error) {
-	return p.GetL1InfoRootLeafByL1InfoRootVx(ctx, l1InfoRoot, dbTx, l1InfoTreeIndexFieldNameV1)
+	return p.GetL1InfoRootLeafByL1InfoRootVx(ctx, l1InfoRoot, dbTx, l1InfoTreeIndexFieldName)
 }
 
 func (p *PostgresStorage) GetL1InfoRootLeafByL1InfoRootVx(ctx context.Context, l1InfoRoot common.Hash, dbTx pgx.Tx, indexFieldName string) (state.L1InfoTreeExitRootStorageEntry, error) {
@@ -129,7 +129,7 @@ func (p *PostgresStorage) GetL1InfoRootLeafByL1InfoRootVx(ctx context.Context, l
 }
 
 func (p *PostgresStorage) GetL1InfoRootLeafByIndex(ctx context.Context, l1InfoTreeIndex uint32, dbTx pgx.Tx) (state.L1InfoTreeExitRootStorageEntry, error) {
-	return p.GetL1InfoRootLeafByIndexVx(ctx, l1InfoTreeIndex, dbTx, l1InfoTreeIndexFieldNameV1)
+	return p.GetL1InfoRootLeafByIndexVx(ctx, l1InfoTreeIndex, dbTx, l1InfoTreeIndexFieldName)
 }
 
 func (p *PostgresStorage) GetL1InfoRootLeafByIndexVx(ctx context.Context, l1InfoTreeIndex uint32, dbTx pgx.Tx, indexFieldName string) (state.L1InfoTreeExitRootStorageEntry, error) {
@@ -147,7 +147,7 @@ func (p *PostgresStorage) GetL1InfoRootLeafByIndexVx(ctx context.Context, l1Info
 	return entry, nil
 }
 func (p *PostgresStorage) GetLeafsByL1InfoRoot(ctx context.Context, l1InfoRoot common.Hash, dbTx pgx.Tx) ([]state.L1InfoTreeExitRootStorageEntry, error) {
-	return p.GetLeafsByL1InfoRootVx(ctx, l1InfoRoot, dbTx, l1InfoTreeIndexFieldNameV1)
+	return p.GetLeafsByL1InfoRootVx(ctx, l1InfoRoot, dbTx, l1InfoTreeIndexFieldName)
 }
 
 func (p *PostgresStorage) GetLeafsByL1InfoRootVx(ctx context.Context, l1InfoRoot common.Hash, dbTx pgx.Tx, indexFieldName string) ([]state.L1InfoTreeExitRootStorageEntry, error) {

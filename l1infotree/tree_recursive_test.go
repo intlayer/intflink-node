@@ -14,10 +14,9 @@ import (
 )
 
 const (
-	L1InfoRootRecursiveHeight    = uint8(32)
-	EmptyL1InfoTreeRecursiveRoot = "0x27ae5ba08d7291c96c8cbddcc148bf48a6d68c7974b94356f53754ef6171d757"
-
-	filenameTestData = "../test/vectors/src/merkle-tree/l1-info-tree-recursive/smt-full-output.json"
+	l1InfoRootRecursiveHeight    = uint8(32)
+	emptyL1InfoTreeRecursiveRoot = "0x27ae5ba08d7291c96c8cbddcc148bf48a6d68c7974b94356f53754ef6171d757"
+	filenameTestData             = "../test/vectors/src/merkle-tree/l1-info-tree-recursive/smt-full-output.json"
 )
 
 type vectorTestData struct {
@@ -43,24 +42,24 @@ func readData(t *testing.T) []vectorTestData {
 }
 
 func TestEmptyL1InfoRootRecursive(t *testing.T) {
-	mtr, err := l1infotree.NewL1InfoTreeRecursive(L1InfoRootRecursiveHeight)
+	mtr, err := l1infotree.NewL1InfoTreeRecursive(l1InfoRootRecursiveHeight)
 	require.NoError(t, err)
 	require.NotNil(t, mtr)
 	root := mtr.GetRoot()
-	require.Equal(t, EmptyL1InfoTreeRecursiveRoot, root.String())
+	require.Equal(t, common.Hash{}.String(), root.String())
 }
 
 func TestEmptyHistoricL1InfoRootRecursive(t *testing.T) {
-	mtr, err := l1infotree.NewL1InfoTreeRecursive(L1InfoRootRecursiveHeight)
+	mtr, err := l1infotree.NewL1InfoTreeRecursive(l1InfoRootRecursiveHeight)
 	require.NoError(t, err)
 	require.NotNil(t, mtr)
 	root := mtr.GetHistoricRoot()
-	require.Equal(t, EmptyL1InfoTreeRecursiveRoot, root.String())
+	require.Equal(t, emptyL1InfoTreeRecursiveRoot, root.String())
 }
 
 func TestBuildTreeVectorData(t *testing.T) {
 	data := readData(t)
-	mtr, err := l1infotree.NewL1InfoTreeRecursive(L1InfoRootRecursiveHeight)
+	mtr, err := l1infotree.NewL1InfoTreeRecursive(l1InfoRootRecursiveHeight)
 	require.NoError(t, err)
 	for _, testVector := range data {
 		minTimestamp, err := strconv.ParseUint(testVector.MinTimestamp, 10, 0)
@@ -69,55 +68,38 @@ func TestBuildTreeVectorData(t *testing.T) {
 		l1DataHash := common.BytesToHash(l1Data[:])
 		assert.Equal(t, testVector.L1DataHash.String(), l1DataHash.String(), "l1Data doesn't match leaf", testVector.Index)
 
-		snapShot, err := mtr.AddLeaf(testVector.Index-1, l1Data)
+		l1InfoTreeRoot, err := mtr.AddLeaf(testVector.Index-1, l1Data)
 		require.NoError(t, err)
-		assert.Equal(t, testVector.HistoricL1InfoRoot.String(), snapShot.HistoricL1InfoTreeRoot.String(), "HistoricL1InfoTreeRoot doesn't match leaf", testVector.Index)
-		assert.Equal(t, testVector.L1DataHash.String(), snapShot.L1Data.String(), "l1Data doesn't match leaf", testVector.Index)
-		assert.Equal(t, testVector.L1InfoTreeRoot.String(), snapShot.L1InfoTreeRoot.String(), "l1InfoTreeRoot doesn't match leaf", testVector.Index)
+		assert.Equal(t, testVector.L1InfoTreeRoot.String(), l1InfoTreeRoot.String(), "l1InfoTreeRoot doesn't match leaf", testVector.Index)
+		assert.Equal(t, testVector.L1InfoTreeRoot.String(), mtr.GetRoot().String(), "l1InfoTreeRoot doesn't match leaf", testVector.Index)
+		assert.Equal(t, testVector.HistoricL1InfoRoot.String(), mtr.GetHistoricRoot().String(), "HistoricL1InfoTreeRoot doesn't match leaf", testVector.Index)
 	}
 }
 
 func TestBuildTreeFromLeaves(t *testing.T) {
 	data := readData(t)
-	mtr, err := l1infotree.NewL1InfoTreeRecursive(L1InfoRootRecursiveHeight)
-	require.NoError(t, err)
-	leaves := [][32]byte{}
-	var lastSnapshot l1infotree.L1InfoTreeRecursiveSnapshot
-	for _, testVector := range data {
-		minTimestamp, err := strconv.ParseUint(testVector.MinTimestamp, 10, 0)
-		require.NoError(t, err)
-		l1Data := l1infotree.HashLeafData(testVector.GlobalExitRoot, testVector.BlockHash, minTimestamp)
-		l1DataHash := common.BytesToHash(l1Data[:])
-		assert.Equal(t, testVector.L1DataHash.String(), l1DataHash.String(), "l1Data doesn't match leaf", testVector.Index)
 
-		snapShot, err := mtr.AddLeaf(testVector.Index-1, l1Data)
-		require.NoError(t, err)
-		leaves = append(leaves, snapShot.L1Data)
-		lastSnapshot = snapShot
+	leaves := [][32]byte{}
+	for _, testVector := range data {
+		leaves = append(leaves, testVector.L1DataHash)
 	}
 
-	newMtr, err := l1infotree.NewL1InfoTreeRecursiveFromLeaves(L1InfoRootRecursiveHeight, leaves)
+	newMtr, err := l1infotree.NewL1InfoTreeRecursiveFromLeaves(l1InfoRootRecursiveHeight, leaves)
 	require.NoError(t, err)
-	assert.Equal(t, lastSnapshot.L1InfoTreeRoot.String(), newMtr.GetRoot().String(), "L1InfoTreeRoot doesn't match leaf")
+	assert.Equal(t, data[len(data)-1].L1InfoTreeRoot.String(), newMtr.GetRoot().String(), "L1InfoTreeRoot doesn't match leaf")
 }
 
 func TestProofsTreeVectorData(t *testing.T) {
 	data := readData(t)
-	mtr, err := l1infotree.NewL1InfoTreeRecursive(L1InfoRootRecursiveHeight)
+	mtr, err := l1infotree.NewL1InfoTreeRecursive(l1InfoRootRecursiveHeight)
 	require.NoError(t, err)
 
 	leaves := [][32]byte{}
 	for _, testVector := range data {
-		minTimestamp, err := strconv.ParseUint(testVector.MinTimestamp, 10, 0)
-		require.NoError(t, err)
-		l1Data := l1infotree.HashLeafData(testVector.GlobalExitRoot, testVector.BlockHash, minTimestamp)
-		l1DataHash := common.BytesToHash(l1Data[:])
-		assert.Equal(t, testVector.L1DataHash.String(), l1DataHash.String(), "l1Data doesn't match leaf", testVector.Index)
-
-		snapShot, err := mtr.AddLeaf(testVector.Index-1, l1Data)
+		l1InfoTreeRoot, err := mtr.AddLeaf(testVector.Index-1, testVector.L1DataHash)
 		require.NoError(t, err)
 
-		leaves = append(leaves, snapShot.L1InfoTreeRoot)
+		leaves = append(leaves, l1InfoTreeRoot)
 
 		mp, _, err := mtr.ComputeMerkleProof(testVector.Index, leaves)
 		require.NoError(t, err)

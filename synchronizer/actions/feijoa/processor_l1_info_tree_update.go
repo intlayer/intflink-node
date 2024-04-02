@@ -26,7 +26,7 @@ func NewProcessorL1InfoTreeUpdate(state stateProcessorL1InfoTreeRecursiveInterfa
 	return &ProcessorL1InfoTreeUpdate{
 		ProcessorBase: *actions.NewProcessorBase[ProcessorL1InfoTreeUpdate](
 			[]etherman.EventOrder{etherman.L1InfoTreeOrder},
-			actions.ForksIdOnlyEtrog),
+			actions.ForksIdOnlyFeijoa),
 		state: state}
 }
 
