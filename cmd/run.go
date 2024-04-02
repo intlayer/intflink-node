@@ -498,6 +498,12 @@ func newState(ctx context.Context, c *config.Config, etherman *etherman.Client, 
 	}
 	log.Infof("Starting L1InfoRoot: %v", l1InfoRoot.String())
 
+	l1InfoTreeRecursiveRoot, err := st.GetCurrentL1InfoTreeRecursiveRoot(ctx, nil)
+	if err != nil {
+		log.Fatal("error getting current l1InfoTreeRecursiveRoot. Error: ", err)
+	}
+	log.Infof("Starting l1InfoTreeRecursiveRoot: %v", l1InfoTreeRecursiveRoot.String())
+
 	forkIDIntervals, err := forkIDIntervals(ctx, st, etherman, c.NetworkConfig.Genesis.BlockNumber)
 	if err != nil {
 		log.Fatal("error getting forkIDs. Error: ", err)
